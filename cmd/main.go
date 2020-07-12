@@ -6,29 +6,9 @@ import (
     "io/ioutil"
     "log"
     "fmt"
+
+    "github.com/smart--petea/kubernetes-client/internal/config"
 )
-
-type ClusterConfig struct {
-    Cluster struct {
-        CertificateAuthority string
-        Server string
-    }
-    Name string
-}
-
-type Config struct {
-    Clusters []ClusterConfig
-}
-
-func (config Config) getClusterByName(name string) (clusterConfig *ClusterConfig, err error) {
-    for _, cluster := range config.Clusters {
-        if cluster.Name == name {
-            return &cluster, err
-        }
-    }
-
-    return nil, fmt.Errorf("Cluster with name %s not found", name)
-}
 
 func main() {
     configPath := "/home/check/.kube/config"
@@ -37,16 +17,27 @@ func main() {
         log.Fatal(err)
     }
 
-    var config Config
+    var config config.ConfigT
     err = yaml.Unmarshal(configBytes, &config)
     if err != nil {
         log.Fatal(err)
     }
 
     fmt.Printf("%+v\n", config)
-    clusterConfig, err  := config.getClusterByName("minikube")
+
+    clusterName := "minikube" //todo add from bash os.Args
+    clusterConfig, err  := config.Clusters.FindByName(clusterName)
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Printf("%+v", clusterConfig.Cluster.Server)
+
+    userName := "minikube" //todo add from bash os.Args
+    userConfig, err := config.Users.FindByName(userName)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("%+v", userConfig)
+
+    fmt.Printf("%+v", clusterConfig.Meta.Server)
 }
