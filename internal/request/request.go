@@ -3,6 +3,7 @@ package request
 import (
     "github.com/smart--petea/kubernetes-client/internal/config"
 
+    "os"
     "net/http"
     "crypto/tls"
     "crypto/x509"
@@ -17,17 +18,19 @@ type clientT struct {
 
 var client *clientT
 
-func InitClient( clusterName string, userName string) error {
+func InitClient() error {
     conf, err := config.GetConfig()
     if err != nil {
         return err
     }
 
+    clusterName := os.Getenv("CLUSTER_NAME")
     clusterConfig, err  := conf.Clusters.FindByName(clusterName)
     if err != nil {
         return err
     }
 
+    userName := os.Getenv("USER_NAME")
     userConfig, err := conf.Users.FindByName(userName)
     if err != nil {
         return err
