@@ -2,18 +2,17 @@ package main
 
 import (
     "log"
-    "fmt"
-    "os"
 
+    "github.com/smart--petea/kubernetes-client/internal/commands"
     "github.com/smart--petea/kubernetes-client/internal/request"
     "github.com/joho/godotenv"
+    "github.com/jessevdk/go-flags"
 )
 
-func main() {
-    if len(os.Args) == 1 {
-        log.Fatal("xxx")
-    }
+type Options struct {
+}
 
+func main() {
     err := godotenv.Load()
     if err != nil {
         log.Fatal("Error loading .env file")
@@ -24,10 +23,11 @@ func main() {
         log.Fatal(err)
     }
 
-    data, err := request.Get("/api")
-    if err != nil {
+    var options Options
+    var parser = flags.NewParser(&options, flags.Default)
+    parser.AddCommand("cluster-info", "Display cluster info", "Display cluster info", &commands.ClusterInfo{})
+
+    if _, err := parser.Parse(); err != nil {
         log.Fatal(err)
     }
-
-    fmt.Printf("%s\n", string(data))
 }
