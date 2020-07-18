@@ -9,7 +9,7 @@ type ClusterInfo struct {
 }
 
 func (clusterInfo *ClusterInfo) Execute(args []string) error {
-    data, err := request.Get("/api")
+    data, err := request.Get("/api/v1/namespaces/kube-system/services?l")
     if err != nil {
         return err
     }
