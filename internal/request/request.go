@@ -81,6 +81,15 @@ func Get(endpoint string) ([]byte, error) {
     return ioutil.ReadAll(resp.Body)
 }
 
+func GetServerAddress() (string, error) {
+    client, err := getHttpClient()
+    if err != nil {
+        return "", err
+    }
+
+    return client.Server, nil
+}
+
 func getHttpClient() (*clientT, error) {
     if client == nil {
         return nil, fmt.Errorf("http client is not initialized")
