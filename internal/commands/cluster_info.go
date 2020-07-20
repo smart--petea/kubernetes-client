@@ -4,6 +4,8 @@ import (
     "fmt"
     "github.com/smart--petea/kubernetes-client/internal/request"
     "encoding/json"
+
+    ct "github.com/daviddengcn/go-colortext"
 )
 
 type ServiceList struct {
@@ -68,7 +70,7 @@ func (clusterInfo *ClusterInfo) Execute(args []string) error {
     if err != nil {
         return err
     }
-    printOutput("Kubernetes master", "is running at", serverAddress)
+    printOutput("Kubernetes master", " is running at ", serverAddress)
 
     data, err := request.Get("/api/v1/namespaces/kube-system/services?l")
     if err != nil {
@@ -82,7 +84,7 @@ func (clusterInfo *ClusterInfo) Execute(args []string) error {
     }
 
     for _, service := range serviceList.Items {
-        printOutput(service.Metadata.Labels["kubernetes.io/name"], "is running at", serverAddress + service.Metadata.SelfLink)
+        printOutput(service.Metadata.Labels["kubernetes.io/name"], " is running at ", serverAddress + service.Metadata.SelfLink)
     }
 
     printOutput("", "", "")
@@ -92,5 +94,12 @@ func (clusterInfo *ClusterInfo) Execute(args []string) error {
 }
 
 func printOutput(green string, white string, yellow string) {
-    fmt.Printf("%s %s %s\n", green, white, yellow)
+    ct.ChangeColor(ct.Green, false, ct.None, false) 
+    fmt.Print(green)
+
+    ct.ResetColor()
+    fmt.Print(white)
+
+    ct.ChangeColor(ct.Yellow, false, ct.None, false) 
+    fmt.Println(yellow)
 }
