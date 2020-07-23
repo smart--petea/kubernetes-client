@@ -26,6 +26,7 @@ func main() {
     var options Options
     var parser = flags.NewParser(&options, flags.Default)
     parser.AddCommand("cluster-info", "Display cluster info", "Display cluster info", &commands.ClusterInfo{})
+    parser.AddCommand("get-nodes", "Display one or many resources", "Display one or many resources", &commands.GetNodes{})
 
     if _, err := parser.Parse(); err != nil {
         log.Fatal(err)
