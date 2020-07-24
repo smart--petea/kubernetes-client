@@ -6,25 +6,35 @@ import (
 
 type Printer struct {
     rows [][]string
+    columnLengths []int
 }
 
 func NewPrinter(numRows int) *Printer {
-    var printer Printer
-    printer.rows = make([]string, 0, numRows)
-
-    return &printer
+    return &Printer{}
 }
 
 func (printer *Printer) AddRow(row ...string) {
-    fmt.Printf("%v\n", row)
-    printer.rows = append(printer.rows, row...)
-    fmt.Printf("%v\n", printer.rows[0])
+    printer.rows = append(printer.rows, row)
+
+    if printer.columnLengths == nil {
+        printer.columnLengths = make([]int, len(row))
+    }
+
+    var columnLength int
+    for i, cell := range row {
+        columnLength = len(cell) + 2
+        if columnLength > printer.columnLengths[i] {
+            printer.columnLengths[i] = columnLength 
+        }
+    }
 }
 
 func (printer *Printer) Print() {
     for _, row := range printer.rows {
-        for _, cell := range row {
-            fmt.Printf("%s\n", cell)
+        fmt.Println()
+        for i, cell := range row {
+            fmt.Printf("%-*s ", printer.columnLengths[i], cell)
         }
     }
+    fmt.Println()
 }

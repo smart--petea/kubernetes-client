@@ -31,6 +31,8 @@ func (getNodes *GetNodes) Execute(args []string) error {
         return err
     }
 
+    fmt.Printf("%s\n", data)
+
     var nodeList NodeList
     err = json.Unmarshal(data, &nodeList)
     if err != nil {
@@ -38,7 +40,7 @@ func (getNodes *GetNodes) Execute(args []string) error {
     }
 
     printer := helper.NewPrinter(len(nodeList.Items) + 1)
-    printer.AddRow("NAME")
+    printer.AddRow("NAME", "STATUS", "ROLES", "AGE", "VERSION")
 
     for _, item := range nodeList.Items {
         printer.AddRow(item.Metadata.Name)
