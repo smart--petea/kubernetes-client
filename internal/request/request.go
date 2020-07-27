@@ -18,6 +18,12 @@ type clientT struct {
 
 var client *clientT
 
+type Request struct {
+    Method string
+    Endpoint string
+    Headers map[string]string
+}
+
 func InitClient() error {
     conf, err := config.GetConfig()
     if err != nil {
@@ -66,15 +72,53 @@ func InitClient() error {
     return nil
 }
 
-func Get(endpoint string) ([]byte, error) {
+func NewRequest(method string, endpoint string) *Request {
+    return &Request{
+        Method: method,
+        Endpoint: endpoint,
+        Headers: make(map[string]string),
+    }
+}
+
+func Get(endpoint string) *Request {
+    return NewRequest("GET", endpoint)
+}
+
+func (request *Request) AddHeader(name string, value string) *Request {
+    oldValue := request.Headers["Accept"]
+    if len(oldValue) == 0 {
+        request.Headers["Accept"] = value
+    } else {
+        request.Headers["Accept"] = oldValue + "," + value
+    }
+
+    return request
+}
+
+func (request *Request) AsJson(group string, version string) *Request {
+    request.AddHeader("Accept", fmt.Sprintf("application/json;g=%s;v=%s", group, version))
+    return request
+}
+
+func (request *Request) AsTable(group string, version string) *Request {
+    request.AddHeader("Accept", fmt.Sprintf("application/json;as=Table;g=%s;v=%s", group, version))
+    return request
+}
+
+func (request *Request) Do() ([]byte, error) {
     client, err := getHttpClient()
     if err != nil {
         return nil, err
     }
 
-    req, err := http.NewRequest("GET", client.Server + endpoint, nil)
+    req, err := http.NewRequest(request.Method, client.Server + request.Endpoint, nil)
     if err != nil {
         return nil, err
+    }
+
+    for headerName, headerValue := range request.Headers {
+        fmt.Println(headerValue)
+        req.Header.Add(headerName, headerValue)
     }
 
     resp, err := client.Do(req)

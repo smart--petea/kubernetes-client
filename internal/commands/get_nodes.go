@@ -2,8 +2,9 @@ package commands
 
 import (
     "github.com/smart--petea/kubernetes-client/internal/request"
-    "github.com/smart--petea/kubernetes-client/internal/helper"
-    "encoding/json"
+//    "github.com/smart--petea/kubernetes-client/internal/helper"
+ //   "encoding/json"
+    "fmt"
 )
 
 type NodeList struct {
@@ -26,13 +27,18 @@ type GetNodes struct {
 }
 
 func (getNodes *GetNodes) Execute(args []string) error {
-    data, err := request.Get("/api/v1/nodes")
+    data, err := request.
+                Get("/api/v1/nodes").
+                AsTable("meta.k8s.io", "v1").
+                AsTable("meta.k8s.io", "v1beta1").
+                Do()
     if err != nil {
         return err
     }
 
     fmt.Printf("%s\n", data)
 
+    /*
     var nodeList NodeList
     err = json.Unmarshal(data, &nodeList)
     if err != nil {
@@ -46,6 +52,7 @@ func (getNodes *GetNodes) Execute(args []string) error {
         printer.AddRow(item.Metadata.Name)
     }
     printer.Print()
+    */
 
     return nil
 }

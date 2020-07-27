@@ -72,7 +72,10 @@ func (clusterInfo *ClusterInfo) Execute(args []string) error {
     }
     printOutput("Kubernetes master", " is running at ", serverAddress)
 
-    data, err := request.Get("/api/v1/namespaces/kube-system/services?l")
+    data, err := request.
+        Get("/api/v1/namespaces/kube-system/services?l").
+        AsJson("meta.k8s.io", "v1").
+        Do()
     if err != nil {
         return err
     }
