@@ -4,6 +4,7 @@ import (
     "fmt"
     "github.com/smart--petea/kubernetes-client/internal/request"
     "encoding/json"
+    "github.com/spf13/cobra"
 
     ct "github.com/daviddengcn/go-colortext"
 )
@@ -61,39 +62,39 @@ type ServiceList struct {
     } `json:"items"`
 }
 
+var ClusterInfo = &cobra.Command{
+    Use:  "cluster-info",
+    Short: "short", 
+    RunE: func(cmd *cobra.Command, args []string) error {
+        serverAddress, err := request.GetServerAddress()
+        if err != nil {
+            return err
+        }
+        printOutput("Kubernetes master", " is running at ", serverAddress)
 
-type ClusterInfo struct {
-}
-
-func (clusterInfo *ClusterInfo) Execute(args []string) error {
-    serverAddress, err := request.GetServerAddress()
-    if err != nil {
-        return err
-    }
-    printOutput("Kubernetes master", " is running at ", serverAddress)
-
-    data, err := request.
+        data, err := request.
         Get("/api/v1/namespaces/kube-system/services?l").
         AsJson("meta.k8s.io", "v1").
         Do()
-    if err != nil {
-        return err
-    }
+        if err != nil {
+            return err
+        }
 
-    var serviceList ServiceList
-    err = json.Unmarshal(data, &serviceList)
-    if err != nil {
-        return err
-    }
+        var serviceList ServiceList
+        err = json.Unmarshal(data, &serviceList)
+        if err != nil {
+            return err
+        }
 
-    for _, service := range serviceList.Items {
-        printOutput(service.Metadata.Labels["kubernetes.io/name"], " is running at ", serverAddress + service.Metadata.SelfLink)
-    }
+        for _, service := range serviceList.Items {
+            printOutput(service.Metadata.Labels["kubernetes.io/name"], " is running at ", serverAddress + service.Metadata.SelfLink)
+        }
 
-    printOutput("", "", "")
-    printOutput("", "To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.", "")
+        printOutput("", "", "")
+        printOutput("", "To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.", "")
 
-    return nil
+        return nil
+    },
 }
 
 func printOutput(green string, white string, yellow string) {

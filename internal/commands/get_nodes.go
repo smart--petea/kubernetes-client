@@ -2,6 +2,7 @@ package commands
 
 import (
     "github.com/smart--petea/kubernetes-client/internal/request"
+    "github.com/spf13/cobra"
 //    "github.com/smart--petea/kubernetes-client/internal/helper"
  //   "encoding/json"
     "fmt"
@@ -23,20 +24,24 @@ type NodeList struct {
     } `json:"items"`
 }
 
-type GetNodes struct {
+var GetNodes = &cobra.Command{
+    Use:  "nodes",
+    RunE: func (cmd *cobra.Command, args []string) error {
+        data, err := request.
+            Get("/api/v1/nodes").
+            AsTable("meta.k8s.io", "v1").
+            AsTable("meta.k8s.io", "v1beta1").
+            Do()
+        if err != nil {
+            return err
+        }
+
+        fmt.Printf("%s\n", data)
+        return nil
+    },
 }
 
-func (getNodes *GetNodes) Execute(args []string) error {
-    data, err := request.
-                Get("/api/v1/nodes").
-                AsTable("meta.k8s.io", "v1").
-                AsTable("meta.k8s.io", "v1beta1").
-                Do()
-    if err != nil {
-        return err
-    }
-
-    fmt.Printf("%s\n", data)
+//func (getNodes *GetNodes) Execute(args []string) error {
 
     /*
     var nodeList NodeList
@@ -54,5 +59,5 @@ func (getNodes *GetNodes) Execute(args []string) error {
     printer.Print()
     */
 
-    return nil
-}
+ //   return nil
+//}

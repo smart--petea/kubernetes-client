@@ -117,7 +117,6 @@ func (request *Request) Do() ([]byte, error) {
     }
 
     for headerName, headerValue := range request.Headers {
-        fmt.Println(headerValue)
         req.Header.Add(headerName, headerValue)
     }
 
