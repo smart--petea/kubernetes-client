@@ -24,21 +24,23 @@ type NodeList struct {
     } `json:"items"`
 }
 
-var GetNodes = &cobra.Command{
-    Use:  "nodes",
-    RunE: func (cmd *cobra.Command, args []string) error {
-        data, err := request.
-            Get("/api/v1/nodes").
-            AsTable("meta.k8s.io", "v1").
-            AsTable("meta.k8s.io", "v1beta1").
-            Do()
-        if err != nil {
-            return err
-        }
+func NewGetNodesCommand() *cobra.Command {
+    return &cobra.Command{
+        Use:  "nodes",
+        RunE: func (cmd *cobra.Command, args []string) error {
+            data, err := request.
+                Get("/api/v1/nodes").
+                AsTable("meta.k8s.io", "v1").
+                AsTable("meta.k8s.io", "v1beta1").
+                Do()
+            if err != nil {
+                return err
+            }
 
-        fmt.Printf("%s\n", data)
-        return nil
-    },
+            fmt.Printf("%s\n", data)
+            return nil
+        },
+    }
 }
 
 //func (getNodes *GetNodes) Execute(args []string) error {
