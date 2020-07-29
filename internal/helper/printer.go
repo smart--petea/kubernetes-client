@@ -31,10 +31,9 @@ func (printer *Printer) AddRow(row ...string) {
 
 func (printer *Printer) Print() {
     for _, row := range printer.rows {
-        fmt.Println()
         for i, cell := range row {
             fmt.Printf("%-*s ", printer.columnLengths[i], cell)
         }
+        fmt.Println()
     }
-    fmt.Println()
 }

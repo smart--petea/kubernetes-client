@@ -2,26 +2,27 @@ package commands
 
 import (
     "github.com/smart--petea/kubernetes-client/internal/request"
+    "github.com/smart--petea/kubernetes-client/internal/helper"
+
     "github.com/spf13/cobra"
-//    "github.com/smart--petea/kubernetes-client/internal/helper"
- //   "encoding/json"
-    "fmt"
+    "encoding/json"
+    "strings"
 )
 
-type NodeList struct {
+type NodesTable struct {
     Kind string `json:"kind"`
     ApiVersion string `json:"apiVersion"`
     Metadata map[string]string `json:"metadata"`
-    Items []struct{
-        Metadata struct{
-            Name string `json:"name"`
-        } `json:"metadata"`
-        Labels map[string]string `json:"labels"`
-        Annotations map[string]string `json:"annotations"`
-        ManagedFields map[string]string `json:"managedFields"`
-        Spec map[string]interface{} `json:"spec"`
-        Status map[string]interface{} `json:"status"`
-    } `json:"items"`
+    ColumnDefinitions []struct{
+        Name string `json:"name"`
+        Type string `json:"type"`
+        Format string `json:"format"`
+        Description string `json:"description"`
+        Priority int `json:"priority"`
+    } `json:"columnDefinitions"`
+    Rows []struct{
+        Cells []string `json:"cells"`
+    } `json:"rows"`
 }
 
 func NewGetNodesCommand() *cobra.Command {
@@ -37,29 +38,41 @@ func NewGetNodesCommand() *cobra.Command {
                 return err
             }
 
-            fmt.Printf("%s\n", data)
+            var nodesTables NodesTable 
+            err = json.Unmarshal(data, &nodesTables)
+            if err != nil {
+                return err
+            }
+
+            var columnIndexes []int
+            var columnNames []string
+            var columnName string
+            for columnIndex, columnDefinition := range nodesTables.ColumnDefinitions {
+                if columnDefinition.Priority != 0 {
+                    continue
+                }
+
+                columnIndexes = append(columnIndexes, columnIndex)
+
+                columnName = strings.ToUpper(columnDefinition.Name)
+                columnNames = append(columnNames, columnName)
+            }
+
+            printer := helper.NewPrinter(len(columnIndexes) + 1)
+            printer.AddRow(columnNames...)
+
+            var forPrint []string
+            for _, row := range nodesTables.Rows {
+                forPrint = forPrint[:0]
+                for _, columnIndex := range columnIndexes {
+                    forPrint = append(forPrint, row.Cells[columnIndex])
+                }
+
+                printer.AddRow(forPrint...)
+            }
+
+            printer.Print()
             return nil
         },
     }
 }
-
-//func (getNodes *GetNodes) Execute(args []string) error {
-
-    /*
-    var nodeList NodeList
-    err = json.Unmarshal(data, &nodeList)
-    if err != nil {
-        return err
-    }
-
-    printer := helper.NewPrinter(len(nodeList.Items) + 1)
-    printer.AddRow("NAME", "STATUS", "ROLES", "AGE", "VERSION")
-
-    for _, item := range nodeList.Items {
-        printer.AddRow(item.Metadata.Name)
-    }
-    printer.Print()
-    */
-
- //   return nil
-//}
